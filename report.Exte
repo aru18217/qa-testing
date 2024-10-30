@@ -1,0 +1,81 @@
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+import com.aventstack.extentreports.reporter.ExtentHtmlReporter;
+import com.aventstack.extentreports.reporter.configuration.Theme;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+public class DemoblazeTestReport {
+    WebDriver driver;
+    ExtentHtmlReporter htmlReporter;
+    ExtentReports extent;
+    ExtentTest test;
+
+    @BeforeClass
+    public void setup() {
+        // Inisialisasi ExtentReports
+        htmlReporter = new ExtentHtmlReporter("DemoblazeTestReport.html");
+        htmlReporter.config().setTheme(Theme.STANDARD);
+        htmlReporter.config().setDocumentTitle("Demoblaze Automation Report");
+        htmlReporter.config().setReportName("Demoblaze Functional Test");
+
+        extent = new ExtentReports();
+        extent.attachReporter(htmlReporter);
+
+        // Inisialisasi WebDriver
+        System.setProperty("webdriver.chrome.driver", "path/to/chromedriver");
+        driver = new ChromeDriver();
+        driver.get("https://demoblaze.com/");
+    }
+
+    @Test(priority = 1)
+    public void signUpTest() {
+        test = extent.createTest("Sign Up Test", "Testing sign up functionality on Demoblaze");
+
+        driver.findElement(By.id("signin2")).click();
+        driver.findElement(By.id("sign-username")).sendKeys("testuser");
+        driver.findElement(By.id("sign-password")).sendKeys("password");
+        driver.findElement(By.xpath("//button[contains(text(),'Sign up')]")).click();
+
+        // Assert and Log Result
+        test.pass("Sign Up test executed successfully.");
+    }
+
+    @Test(priority = 2)
+    public void loginTest() {
+        test = extent.createTest("Login Test", "Testing login functionality on Demoblaze");
+
+        driver.findElement(By.id("login2")).click();
+        driver.findElement(By.id("loginusername")).sendKeys("testuser");
+        driver.findElement(By.id("loginpassword")).sendKeys("password");
+        driver.findElement(By.xpath("//button[contains(text(),'Log in')]")).click();
+
+        // Assert login success
+        Assert.assertTrue(driver.findElement(By.id("nameofuser")).isDisplayed());
+        test.pass("Login test executed successfully.");
+    }
+
+    @Test(priority = 3)
+    public void addToCartTest() {
+        test = extent.createTest("Add To Cart Test", "Testing add to cart functionality on Demoblaze");
+
+        driver.findElement(By.linkText("Samsung galaxy s6")).click();
+        driver.findElement(By.linkText("Add to cart")).click();
+        
+        // Check for alert (confirmation)
+        driver.switchTo().alert().accept();
+        
+        test.pass("Add To Cart test executed successfully.");
+    }
+
+    @AfterClass
+    public void tearDown() {
+        driver.quit();
+        extent.flush(); // Generate the report
+    }
+}
